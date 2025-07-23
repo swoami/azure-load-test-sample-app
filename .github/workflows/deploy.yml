@@ -8,8 +8,8 @@ permissions:
 
 env:
   # For AZURE_WEBAPP_NAME enter just the name, not the full URL.
-  AZURE_WEBAPP_NAME: <your web app name> 
-  RESOURCE_GROUP: az2006-rg
+  AZURE_WEBAPP_NAME: github-tests
+  RESOURCE_GROUP: RG-LoadTesting
   
 
 jobs:
