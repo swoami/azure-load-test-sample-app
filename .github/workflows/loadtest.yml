@@ -10,7 +10,7 @@ env:
   # For AZURE_WEBAPP_NAME enter just the name, not the full URL.
   RESOURCE_GROUP: RG-LoadTesting
   LOAD_TEST_RESOURCE: LoadTestingDemo1
-  AZURE_WEBAPP_NAME: github-tests
+  AZURE_WEBAPP_URL: github-tests-f7c9g3hgecdtdvdr.westeurope-01.azurewebsites.net
 
 jobs:
   # This workflow consists of a single job called "loadtest"
@@ -41,7 +41,7 @@ jobs:
             [
               {
               "name": "webapp",
-              "value": "${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+              "value": "${{ env.AZURE_WEBAPP_URL }}
               }
             ]
 
