@@ -41,7 +41,7 @@ jobs:
             [
               {
               "name": "webapp",
-              "value": "${{ env.AZURE_WEBAPP_URL }}
+              "value": "${{ env.AZURE_WEBAPP_URL }}"
               }
             ]
 
