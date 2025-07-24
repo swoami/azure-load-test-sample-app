@@ -3,9 +3,9 @@ name: Load test
 on: [workflow_dispatch]
 
 permissions:
-  id-token: write
-  contents: read
-  pages: write  # Needed for deploy-pages
+  id-token: write  # Required to fetch OIDC token
+  contents: read   # Required for actions/checkout
+  pages: write     # Required for GitHub Pages deployment
 
 env:
   RESOURCE_GROUP: RG-LoadTesting
@@ -40,25 +40,23 @@ jobs:
               }
             ]
 
-      - name: Unzip load test result files
+      - name: Unzip inner zip files
         run: |
           mkdir -p loadTest/unzipped
           for f in loadTest/*.zip; do
             unzip -o "$f" -d "loadTest/unzipped/$(basename "$f" .zip)"
           done
 
-      - name: Upload artifact (raw + unzipped)
+      - name: Upload full load test results
         uses: actions/upload-artifact@v4
         with:
           name: loadTestResults
           path: loadTest
 
-      # Upload as GitHub Pages artifact
-      - name: Upload Pages artifact
+      - name: Upload summary report to GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: loadTest/unzipped
+          path: loadTest/unzipped/report  # ✅ Assumes report.zip extracted here
 
-      # Deploy GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
