@@ -56,7 +56,11 @@ jobs:
       - name: Upload summary report to GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: loadTest/unzipped/report  # ✅ Assumes report.zip extracted here
+          path: loadTest/unzipped/report
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
+
+      - name: Add GitHub Pages link to summary
+        run: |
+          echo "### ✅ [View Load Test Report](https://swoami.github.io/azure-load-test-sample-app/)" >> $GITHUB_STEP_SUMMARY
