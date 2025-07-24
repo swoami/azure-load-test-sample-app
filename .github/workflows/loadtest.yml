@@ -3,26 +3,22 @@ name: Load test
 on: [workflow_dispatch]
 
 permissions:
-  id-token: write # Require write permission to Fetch an OIDC token.
-  contents: read  # This is required for actions/checkout
+  id-token: write
+  contents: read
+  pages: write  # Needed for deploy-pages
 
 env:
-  # For AZURE_WEBAPP_NAME enter just the name, not the full URL.
   RESOURCE_GROUP: RG-LoadTesting
   LOAD_TEST_RESOURCE: LoadTestingDemo1
   AZURE_WEBAPP_URL: github-tests-f7c9g3hgecdtdvdr.westeurope-01.azurewebsites.net
 
 jobs:
-  # This workflow consists of a single job called "loadtest"
-
   loadtest:
-
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      #Login in your azure subscription using OpenID Connect (credentials stored as GitHub secrets in repo)
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -30,26 +26,39 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # Run the load test
       - name: Azure Load Testing
         uses: azure/load-testing@v1.1.27
         with:
           loadTestConfigFile: 'config.yaml'
-          loadTestResource: ${{ env.LOAD_TEST_RESOURCE}}
+          loadTestResource: ${{ env.LOAD_TEST_RESOURCE }}
           resourceGroup: ${{ env.RESOURCE_GROUP }}
           env: |
             [
               {
-              "name": "webapp",
-              "value": "${{ env.AZURE_WEBAPP_URL }}"
+                "name": "webapp",
+                "value": "${{ env.AZURE_WEBAPP_URL }}"
               }
             ]
 
-      # upload the published website code artifacts
-      - name: Upload artifact for deployment job
+      - name: Unzip load test result files
+        run: |
+          mkdir -p loadTest/unzipped
+          for f in loadTest/*.zip; do
+            unzip -o "$f" -d "loadTest/unzipped/$(basename "$f" .zip)"
+          done
+
+      - name: Upload artifact (raw + unzipped)
         uses: actions/upload-artifact@v4
         with:
           name: loadTestResults
-          path: ${{github.workspace}}/loadTest
+          path: loadTest
 
-          
+      # Upload as GitHub Pages artifact
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: loadTest/unzipped
+
+      # Deploy GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
